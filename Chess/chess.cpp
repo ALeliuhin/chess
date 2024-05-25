@@ -42,8 +42,8 @@ void Square::setPieceAndColor(Piece p, Color c)
 void Board::printBoard() {
     using namespace std;
 
-    cout << GREEN << "   x: 0  1  2  3  4  5  6  7 " << RESET << endl;
-    cout << GREEN << " y:" << RESET << endl;
+    cout << GREEN << "      0  1  2  3  4  5  6  7 " << RESET << endl;
+    cout << GREEN << " " << RESET << endl;
     for (int i = 0; i < 8; i++) {
         cout << GREEN << " " << i << "   " << RESET;
         for (int j = 0; j < 8; j++) {
@@ -91,7 +91,7 @@ bool Board::doMove() {
 	bool stop = false;
 	while (!stop)
 	{
-        (turn == WHITE) ? cout << "White's turn" << endl : cout << "Black's turn" << endl;
+        (turn == WHITE) ? cout << "\nWhite's turn" << endl : cout << "\nBlack's turn" << endl;
 		cout << "Type in your move as a single four character string. Use x-coordinates first in each pair." << endl;
 		cin >> move;
 		x1 = move[0] - 48;
