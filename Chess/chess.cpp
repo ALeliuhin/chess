@@ -42,15 +42,15 @@ void Square::setPieceAndColor(Piece p, Color c)
 void Board::printBoard() {
     using namespace std;
 
-    cout << GREEN << "      0  1  2  3  4  5  6  7 " << RESET << endl;
-    cout << GREEN << " " << RESET << endl;
+    cout << GREEN << "   x: 0  1  2  3  4  5  6  7 " << RESET << endl;
+    cout << GREEN << " y:" << RESET << endl;
     for (int i = 0; i < 8; i++) {
         cout << GREEN << " " << i << "   " << RESET;
         for (int j = 0; j < 8; j++) {
             Piece p = square[i][j].getPiece();
             Color c = square[i][j].getColor();
 
-            string color_code = (i < 4) ? BOLD_WHITE : BOLD_RED;
+            string color_code = (c == WHITE) ? BOLD_WHITE : BOLD_RED;
 
             switch (p) {
                 case KING:
