@@ -16,7 +16,7 @@ int main()
 	cin >> s;
 
 	while(newgame){
-		b.setBoard();
+		b.setBoard_EnPassant();
 		while (b.playGame());
 		cout << "Do you want to play again? (y for yes, anything else for no) ";
 		cin >> s;

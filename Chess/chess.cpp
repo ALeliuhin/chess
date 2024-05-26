@@ -42,8 +42,8 @@ void Square::setPieceAndColor(Piece p, Color c)
 void Board::printBoard() {
     using namespace std;
 
-    cout << GREEN << "   x: 0  1  2  3  4  5  6  7 " << RESET << endl;
-    cout << GREEN << " y:" << RESET << endl;
+    cout << GREEN << "   y: 0  1  2  3  4  5  6  7 " << RESET << endl;
+    cout << GREEN << " x:" << RESET << endl;
     for (int i = 0; i < 8; i++) {
         cout << GREEN << " " << i << "   " << RESET;
         for (int j = 0; j < 8; j++) {
@@ -81,6 +81,11 @@ void Board::printBoard() {
         }
         cout << endl;
     }
+}
+
+
+Color Board::getTurn() {
+    return turn;
 }
 
 
@@ -172,6 +177,84 @@ void Board::setBoard()
 		}
 }
 
+
+void Board::setBoard_EnPassant() {
+
+
+
+
+
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+            square[i][j].setPieceAndColor(EMPTY, NONE);
+    }
+
+    for (int i = 0; i < 8; i++)
+        for (int j = 0; j < 8; j++)
+        {
+            square[i][j].setX(i);
+            square[i][j].setY(j);
+        }
+
+    square[1][3].setPieceAndColor(PAWN,WHITE);
+    square[1][4].setPieceAndColor(PAWN,WHITE);
+    square[1][5].setPieceAndColor(PAWN,WHITE);
+    square[1][6].setPieceAndColor(PAWN,WHITE);
+
+
+    square[3][2].setPieceAndColor(PAWN,BLACK);
+    square[3][3].setPieceAndColor(PAWN,BLACK);
+    square[3][4].setPieceAndColor(PAWN,BLACK);
+    square[3][5].setPieceAndColor(PAWN,BLACK);
+    square[6][0].setPieceAndColor(PAWN,BLACK);
+    square[6][1].setPieceAndColor(PAWN,BLACK);
+
+}
+
+
+void Board::setBoard_Castling() {
+    square[0][0].setPieceAndColor(ROOK, WHITE);
+    square[0][1].setPieceAndColor(EMPTY, NONE);
+    square[0][2].setPieceAndColor(EMPTY, NONE);
+    square[0][3].setPieceAndColor(EMPTY, NONE);
+    square[0][4].setPieceAndColor(KING, WHITE);
+    square[0][5].setPieceAndColor(EMPTY, NONE);
+    square[0][6].setPieceAndColor(EMPTY, NONE);
+    square[0][7].setPieceAndColor(ROOK, WHITE);
+
+    square[7][0].setPieceAndColor(ROOK, BLACK);
+    square[7][1].setPieceAndColor(EMPTY, NONE);
+    square[7][2].setPieceAndColor(EMPTY, NONE);
+    square[7][3].setPieceAndColor(EMPTY, NONE);
+    square[7][4].setPieceAndColor(KING, BLACK);
+    square[7][5].setPieceAndColor(EMPTY, NONE);
+    square[7][6].setPieceAndColor(EMPTY, NONE);
+    square[7][7].setPieceAndColor(ROOK, BLACK);
+
+    for (int i = 0; i < 8; i++)
+    {
+        square[1][i].setPieceAndColor(PAWN, WHITE);
+        square[6][i].setPieceAndColor(PAWN, BLACK);
+
+    }
+
+    for (int i = 2; i < 6; i++)
+    {
+        for (int j = 0; j < 8; j++)
+            square[i][j].setPieceAndColor(EMPTY, NONE);
+    }
+
+    for (int i = 0; i < 8; i++)
+        for (int j = 0; j < 8; j++)
+        {
+            square[i][j].setX(i);
+            square[i][j].setY(j);
+        }
+}
+
+
+
 bool Board::playGame()
 {
 	system("cls");
@@ -180,25 +263,85 @@ bool Board::playGame()
 }
 
 bool Board::moveKing(Square* thisKing, Square* thatSpace) {
-	//off board inputs should be handled elsewhere (before this)
-	//squares with same color should be handled elsewhere (before this)
+    //off board inputs should be handled elsewhere (before this)
+    //squares with same color should be handled elsewhere (before this)
     int kingX = thisKing->getX();
-	int kingY = thisKing->getY();
-	int thatX = thatSpace->getX();
-	int thatY = thatSpace->getY();
+    int kingY = thisKing->getY();
+    int thatX = thatSpace->getX();
+    int thatY = thatSpace->getY();
 
-	if ((abs(kingX - thatX) == 1 && abs(kingY - thatY) == 0) || (abs(kingX - thatX) == 0 && abs(kingY - thatY) == 1) || (abs(kingX - thatX) == 1 && abs(kingY - thatY) == 1))
-	{
-		thatSpace->setSpace(thisKing);
-		thisKing->setEmpty();
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+    //Castle verify
+    //Create flag for castling? Rn it can do it multiple times if conditions are met
+    //for white
+
+    if ((getTurn() == WHITE && (kingX == 0 && kingY == 4))) {
+        //Right side ROOK
+        if ((thatX == 0 && thatY == 6) && getSquare(0, 7)->getPiece() == ROOK) {
+            if (getSquare(0, 5)->getColor() == NONE && getSquare(0, 6)->getColor() == NONE) {
+
+                thatSpace->setSpace(thisKing);
+                thisKing->setEmpty();
+                getSquare(0, 5)->setPieceAndColor(ROOK, WHITE);
+                getSquare(0, 7)->setEmpty();
+                return true;
+            }
+
+        }
+        //Left side ROOK
+        if ((thatX == 0 && thatY == 2) && getSquare(0, 0)->getPiece() == ROOK) {
+            if (getSquare(0, 3)->getColor() == NONE && getSquare(0, 2)->getColor() == NONE &&
+                getSquare(0, 1)->getColor() == NONE) {
+
+                thatSpace->setSpace(thisKing);
+                thisKing->setEmpty();
+                getSquare(0, 3)->setPieceAndColor(ROOK, WHITE);
+                getSquare(0, 0)->setEmpty();
+                return true;
+            }
+
+        }
+    }
+            //for Black side
+    else if ((getTurn() == BLACK && (kingX == 7 && kingY == 4))) {
+        //Right side ROOK
+        if ((thatX == 7 && thatY == 6) && getSquare(7, 7)->getPiece() == ROOK) {
+            if (getSquare(7, 5)->getColor() == NONE && getSquare(7, 6)->getColor() == NONE) {
+
+                thatSpace->setSpace(thisKing);
+                thisKing->setEmpty();
+                getSquare(7, 5)->setPieceAndColor(ROOK, BLACK);
+                getSquare(7, 7)->setEmpty();
+                return true;
+            }
+
+        }
+        //Left side ROOK
+        if ((thatX == 7 && thatY == 2) && getSquare(7, 0)->getPiece() == ROOK) {
+            if (getSquare(7, 3)->getColor() == NONE && getSquare(7, 2)->getColor() == NONE &&
+                getSquare(7, 1)->getColor() == NONE) {
+
+                thatSpace->setSpace(thisKing);
+                thisKing->setEmpty();
+                getSquare(7, 3)->setPieceAndColor(ROOK, BLACK);
+                getSquare(7, 0)->setEmpty();
+                return true;
+            }
+
+        }
+
+
 }
 
+    if ((abs(kingX - thatX) == 1 && abs(kingY - thatY) == 0) ||
+        (abs(kingX - thatX) == 0 && abs(kingY - thatY) == 1) ||
+        (abs(kingX - thatX) == 1 && abs(kingY - thatY) == 1)) {
+        thatSpace->setSpace(thisKing);
+        thisKing->setEmpty();
+        return true;
+    } else {
+        return false;
+    }
+}
 bool Board::moveQueen(Square* thisQueen, Square* thatSpace) { //there might be problems with numbers of brackets
 													   //off board inputs should be handled elsewhere (before this)
 													   //squares with same color should be handled elsewhere (before this)
@@ -347,14 +490,28 @@ bool Board::movePawn(Square* thisPawn, Square* thatSpace) {
 	//off board inputs should be handled elsewhere (before this)
 	//squares with same color should be handled elsewhere (before this)
 	using namespace std;
-	bool invalid = false;
 	int pawnX = thisPawn->getX();
 	int pawnY = thisPawn->getY();
 	int thatX = thatSpace->getX();
 	int thatY = thatSpace->getY();
 
+
+    //First move (2 steps)
+
+
+
+
+
+
 	if (thisPawn->getColor() == WHITE)
 	{
+        if(pawnX == 1 && thatX == 3 && getSquare(2,pawnY)->getColor() == NONE && thatSpace->getColor() == NONE){
+            thatSpace->setSpace(thisPawn);
+            thisPawn->setEmpty();
+            return true;
+        }
+
+
 		if (pawnX == thatX - 1 && thatY == pawnY && thatSpace->getColor() == NONE)
 		{
 			thatSpace->setSpace(thisPawn);
@@ -374,6 +531,11 @@ bool Board::movePawn(Square* thisPawn, Square* thatSpace) {
 	else
 		if (thisPawn->getColor() == BLACK)
 		{
+            if(pawnX == 6 && thatX == 4 && getSquare(5,pawnY)->getColor() == NONE && thatSpace->getColor() == NONE){
+                thatSpace->setSpace(thisPawn);
+                thisPawn->setEmpty();
+                return true;
+            }
 			if (pawnX == thatX + 1 && thatY == pawnY && thatSpace->getColor() == NONE)
 			{
 				thatSpace->setSpace(thisPawn);
