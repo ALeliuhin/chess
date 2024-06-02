@@ -7,43 +7,41 @@ const std::string GREEN = "\033[1;32m";
 
 Square::Square()
 {
-	piece = EMPTY;
-	color = NONE;
+	this->piece = EMPTY;
+	this->color = NONE;
 }
 
 void Square::setSpace(Square* space)
 {
-	color = space->getColor();
-	piece = space->getPiece();
+	this->color = space->getColor();
+	this->piece = space->getPiece();
 }
 
 void Square::setEmpty()
 {
-	color = NONE;
-	piece = EMPTY;
+	this->color = NONE;
+	this->piece = EMPTY;
 }
 
 Piece Square::getPiece()
 {
-	return piece;
+	return this->piece;
 }
 
 Color Square::getColor()
 {
-	return color;
+	return this->color;
 }
 
 void Square::setPieceAndColor(Piece p, Color c)
 {
-	piece = p;
-	color = c;
+	this->piece = p;
+	this->color = c;
 }
 
 void Board::printBoard() {
-    using namespace std;
-
-    cout << GREEN << "   x: 0  1  2  3  4  5  6  7 " << RESET << endl;
-    cout << GREEN << " y:" << RESET << endl;
+    cout << GREEN << "      0  1  2  3  4  5  6  7 " << RESET << endl;
+    cout << GREEN << " " << RESET << endl;
     for (int i = 0; i < 8; i++) {
         cout << GREEN << " " << i << "   " << RESET;
         for (int j = 0; j < 8; j++) {
@@ -63,7 +61,7 @@ void Board::printBoard() {
                     cout << color_code << " B " << RESET;
                     break;
                 case KNIGHT:
-                    cout << color_code << " H " << RESET;
+                    cout << color_code << " N " << RESET;
                     break;
                 case ROOK:
                     cout << color_code << " R " << RESET;
@@ -83,16 +81,39 @@ void Board::printBoard() {
     }
 }
 
-
 bool Board::doMove() {
-	using namespace std;
 	string move;
 	int x1, x2, y1, y2;
 	bool stop = false;
 	while (!stop)
 	{
-        (turn == WHITE) ? cout << "White's turn" << endl : cout << "Black's turn" << endl;
+        (turn == WHITE) ? cout << "\nWhite's turn" << endl : cout << "\nBlack's turn" << endl;
+        if (turn == WHITE) {
+            if (is_in_check(this->WhiteKingX, this->WhiteKingY) != KING) {
+                if (!is_checkmated(this->WhiteKingX, this->WhiteKingY)) {
+                    cout<<"!!!Your king is in check!!!"<<endl;
+                    static bool check = true;
+                }
+                else {
+                    cout << "BLACK WINS" << endl;
+			        return false;
+                }
+            }
+        }
+        else
+            if (is_in_check(this->BlackKingX, this->BlackKingY) != KING) {
+                if (!is_checkmated(this->BlackKingX, this->BlackKingY)) {
+                    cout<<"!!!Your king is in check!!!"<<endl;
+                    static bool check = true;
+                }
+                else if (is_checkmated(this->BlackKingX, this->BlackKingY)) {
+                    cout << "WHITE WINS" << endl;
+                    return false;
+                }
+            }
 		cout << "Type in your move as a single four character string. Use x-coordinates first in each pair." << endl;
+        cout<<"White king is on "<<this->WhiteKingX<<" "<<this->WhiteKingY<<endl;
+        cout<<"Black king is on "<<this->BlackKingX<<" "<<this->BlackKingY<<endl;
 		cin >> move;
 		x1 = move[0] - 48;
 		y1 = move[1] - 48;
@@ -104,24 +125,11 @@ bool Board::doMove() {
 			{
 				cout << "Invalid move, try again." << endl;
 			}
-			else
-				stop = true;
+            else stop = true;
 		}
 		else
 			cout << "That's not your piece. Try again." << endl;
 	}
-	/*if (getSquare(x2, y2)->getPiece() == KING)
-		if (getSquare(x1, y1)->getColor() == WHITE)
-		{
-			cout << "WHITE WINS" << endl;
-			return false;
-		}
-		else
-		{
-			cout << "BLACK WINS" << endl;
-			return false;
-		}
-*/
 
 	if (turn == BLACK)
 		turn = WHITE;
@@ -151,6 +159,11 @@ void Board::setBoard()
 	square[7][6].setPieceAndColor(KNIGHT, BLACK);
 	square[7][7].setPieceAndColor(ROOK, BLACK);
 
+	this->BlackKingX = 7;
+	this->BlackKingY = 4;
+	this->WhiteKingX = 0;
+	this->WhiteKingY = 4;
+
 	for (int i = 0; i < 8; i++)
 	{
 		square[1][i].setPieceAndColor(PAWN, WHITE);
@@ -179,6 +192,435 @@ bool Board::playGame()
 	return doMove();
 }
 
+Piece Board::is_in_check(int kingX, int kingY)
+{
+    for (int i=kingX+1; i<8; i++) {
+        if (square[i][kingY].color != square[kingX][kingY].color && square[i][kingY].color != NONE) {
+            if (this->square[i][kingY].piece == QUEEN) return QUEEN;
+            else if (this->square[i][kingY].piece == ROOK) return ROOK;
+            else break;
+        }
+        if (square[i][kingY].color == square[kingX][kingY].color) break;
+
+        if (square[kingY][i].color != square[kingX][kingY].color && square[kingY][i].color != NONE) {
+            if (this->square[kingY][i].piece == QUEEN) return QUEEN;
+            else if (this->square[kingY][i].piece == ROOK) return ROOK;
+            else break;
+        }
+        if (square[kingY][i].color == square[kingX][kingY].color) break;
+    }
+
+    for (int i=kingX-1; i>=0; i--) {
+        if (square[i][kingY].color != square[kingX][kingY].color && square[i][kingY].color != NONE) {
+            if (square[i][kingY].piece == QUEEN) return QUEEN;
+            else if (square[i][kingY].piece == ROOK) return ROOK;
+            else break;
+        }
+        if (square[i][kingY].color == square[kingX][kingY].color) break;
+
+        if (square[kingY][i].color != square[kingX][kingY].color && square[kingY][i].color != NONE) {
+            if (square[kingY][i].piece == QUEEN) return QUEEN;
+            else if (square[kingY][i].piece == ROOK) return ROOK;
+            else break;
+        }
+        if (square[kingY][i].color == square[kingX][kingY].color) break;
+    }
+
+    for (int i=kingX-1, j=kingY-1; i>=0, j>=0; i--,j--) {
+        if (square[i][j].color != square[kingX][kingY].color && square[i][j].color != NONE) {
+           if (square[i][j].piece == BISHOP) return BISHOP;
+           else if (square[i][j].piece == QUEEN) return QUEEN;
+           else break;
+        }
+        if (square[i][j].color == square[kingX][kingY].color) break;
+    }
+
+    for (int i=kingX+1, j=kingY+1; i<8, j<8; i++,j++) {
+        if (square[i][j].color != square[kingX][kingY].color && square[i][j].color != NONE) {
+            if (square[i][j].piece == BISHOP) return BISHOP;
+            else if (square[i][j].piece == QUEEN) return QUEEN;
+            else break;
+        }
+        if (square[i][j].color == square[kingX][kingY].color && square[i][j].color != NONE) break;
+    }
+
+    for (int i=kingX, j=kingY; i>=0, j<8; i--,j++) {
+        if (square[i][j].color != square[kingX][kingY].color && square[i][j].color != NONE) {
+           if (square[i][j].piece == BISHOP) return BISHOP;
+           else if (square[i][j].piece == QUEEN) return QUEEN;
+           else break;
+        }
+        if (square[i][j].color == square[kingX][kingY].color) break;
+    }
+
+    for (int i=kingX, j=kingY; i<8, j>=0; i++,j--) {
+        if (square[i][j].color != square[kingX][kingY].color && square[i][j].color != NONE) {
+            if (square[i][j].piece == BISHOP) return BISHOP;
+            else if (square[i][j].piece == QUEEN) return QUEEN;
+            else break;
+        }
+        if (square[i][j].color == square[kingX][kingY].color) break;
+    }
+
+    if (square[kingX-1][kingY-1].piece == PAWN && square[kingX-1][kingY-1].color == WHITE && square[kingX][kingY].color == BLACK) return PAWN;
+    if (square[kingX+1][kingY+1].piece == PAWN && square[kingX+1][kingY+1].color == WHITE && square[kingX][kingY].color == BLACK) return PAWN;
+    if (square[kingX+1][kingY-1].piece == PAWN && square[kingX+1][kingY-1].color == BLACK && square[kingX][kingY].color == WHITE) return PAWN;
+    if (square[kingX-1][kingY+1].piece == PAWN && square[kingX-1][kingY+1].color == BLACK && square[kingX][kingY].color == WHITE) return PAWN;
+
+    if (square[kingX-2][kingY+1].color != square[kingX][kingY].color && square[kingX-2][kingY+1].piece == KNIGHT) return KNIGHT;
+    if (square[kingX+2][kingY+1].color != square[kingX][kingY].color && square[kingX+2][kingY+1].piece == KNIGHT) return KNIGHT;
+    if (square[kingX-2][kingY-1].color != square[kingX][kingY].color && square[kingX-2][kingY-1].piece == KNIGHT) return KNIGHT;
+    if (square[kingX-1][kingY-2].color != square[kingX][kingY].color && square[kingX-1][kingY-2].piece == KNIGHT) return KNIGHT;
+    if (square[kingX-1][kingY+2].color != square[kingX][kingY].color && square[kingX-1][kingY+2].piece == KNIGHT) return KNIGHT;
+    if (square[kingX+1][kingY+2].color != square[kingX][kingY].color && square[kingX+1][kingY+2].piece == KNIGHT) return KNIGHT;
+    if (square[kingX+1][kingY-2].color != square[kingX][kingY].color && square[kingX+1][kingY-2].piece == KNIGHT) return KNIGHT;
+    if (square[kingX+2][kingY-1].color != square[kingX][kingY].color && square[kingX+2][kingY-1].piece == KNIGHT) return KNIGHT;
+
+    return KING;
+}
+
+bool Board::is_checkmated(int kingX, int kingY)
+{
+    if (!KingPossibleMoves(kingX, kingY) && !PawnPossibleMoves(kingX, kingY) &&
+        !QueenPossibleMoves(kingX, kingY) && !KnightPossibleMoves(kingX, kingY) &&
+        !BishopPossibleMoves(kingX, kingY) && !RookPossibleMoves(kingX, kingY)) return true;
+
+    return false;
+}
+
+void Board::swap_pieces(Square *A, Square *B)
+{
+    Square C;
+    C.setPieceAndColor(A->getPiece(), A->getColor());
+    A->setSpace(B);
+    B->setSpace(&C);
+}
+
+bool Board::KingPossibleMoves(int kingX, int kingY)
+{
+    int ok=0;
+
+        Square *thisPiece = getSquare(kingX, kingY);
+
+        Square *thatSpace = getSquare(kingX+1, kingY);
+        if (square[kingX][kingY].getColor() != square[kingX+1][kingY].getColor() && kingX+1<8) {
+            swap_pieces(thisPiece, thatSpace);
+            if (is_in_check(kingX+1, kingY) == KING) ok=1;
+            swap_pieces(thisPiece, thatSpace);
+        }
+
+        thatSpace = getSquare(kingX+1, kingY+1);
+        if (square[kingX][kingY].getColor() != square[kingX+1][kingY+1].getColor() && kingX+1<8 && kingY+1<8) {
+            swap_pieces(thisPiece, thatSpace);
+            if (is_in_check(kingX+1, kingY+1) == KING) ok=1;
+            swap_pieces(thisPiece, thatSpace);
+        }
+
+        thatSpace = getSquare(kingX+1, kingY-1);
+        if (square[kingX][kingY].getColor() != square[kingX+1][kingY-1].getColor() && kingX+1<8 && kingY-1>=0) {
+            swap_pieces(thisPiece, thatSpace);
+            if (is_in_check(kingX+1, kingY-1) == KING) ok=1;
+            swap_pieces(thisPiece, thatSpace);
+        }
+
+        thatSpace = getSquare(kingX, kingY+1);
+        if (square[kingX][kingY].getColor() != square[kingX][kingY+1].getColor() && kingY+1<8) {
+            swap_pieces(thisPiece, thatSpace);
+            if (is_in_check(kingX, kingY+1) == KING) ok=1;
+            swap_pieces(thisPiece, thatSpace);
+        }
+
+        thatSpace = getSquare(kingX, kingY-1);
+        if (square[kingX][kingY].getColor() != square[kingX][kingY-1].getColor() && kingY-1>=0) {
+            swap_pieces(thisPiece, thatSpace);
+            if (is_in_check(kingX, kingY-1) == KING) ok=1;
+            swap_pieces(thisPiece, thatSpace);
+        }
+
+        thatSpace = getSquare(kingX-1, kingY+1);
+        if (square[kingX][kingY].getColor() != square[kingX-1][kingY+1].getColor()&& kingY+1<8 && kingX-1>=0) {
+            swap_pieces(thisPiece, thatSpace);
+            if (is_in_check(kingX-1, kingY+1) == KING) ok=1;
+            swap_pieces(thisPiece, thatSpace);
+        }
+
+        thatSpace = getSquare(kingX-1, kingY-1);
+        if (square[kingX][kingY].getColor() != square[kingX-1][kingY-1].getColor() && kingY-1>=0 && kingX-1>=0) {
+            swap_pieces(thisPiece, thatSpace);
+            if (is_in_check(kingX-1, kingY-1) == KING) ok=1;
+            swap_pieces(thisPiece, thatSpace);
+        }
+
+        thatSpace = getSquare(kingX-1, kingY);
+        if (square[kingX][kingY].getColor() != square[kingX-1][kingY].getColor() && kingX-1>=0) {
+            swap_pieces(thisPiece, thatSpace);
+            if (is_in_check(kingX-1, kingY) == KING) ok=1;
+            swap_pieces(thisPiece, thatSpace);
+        }
+
+    if (ok) return true;
+    return false;
+}
+
+bool Board::PawnPossibleMoves(int kingX, int kingY)
+{
+    int ok=0;
+
+        for (int i=0; i<8; i++) {
+            for (int j=0; j<8; j++) {
+                if ((square[i][j].getColor() == square[kingX][kingY].getColor() && square[kingX][kingY].getColor() == WHITE && square[i][j].getPiece() == PAWN)){
+                    Square *thisPiece = getSquare(i, j);
+                    Square *thatSpace = getSquare(i+1, j);
+                    if (square[i][j].getColor() != square[i+1][j].getColor()) {
+                            swap_pieces(thisPiece, thatSpace);
+                            if (is_in_check(kingX, kingY) == KING) ok=1;
+                            swap_pieces(thisPiece, thatSpace);
+                        }
+                }
+                else if ((square[i][j].getColor() == square[kingX][kingY].getColor() && square[kingX][kingY].getColor() == BLACK && square[i][j].getPiece() == PAWN)){
+                    Square *thisPiece = getSquare(i, j);
+                    Square *thatSpace = getSquare(i-1, j);
+                    if (square[i][j].getColor() != square[i-1][j].getColor()) {
+                            swap_pieces(thisPiece, thatSpace);
+                            if (is_in_check(kingX, kingY) == KING) ok=1;
+                            swap_pieces(thisPiece, thatSpace);
+                        }
+                }
+            }
+        }
+
+    if (ok) return true;
+    return false;
+}
+
+bool Board::QueenPossibleMoves(int kingX, int kingY)
+{
+    int ok=0;
+
+        for (int i=0; i<8; i++) {
+            for (int j=0; j<8; j++) {
+                if (square[i][j].getColor() == square[kingX][kingY].getColor() && square[i][j].getPiece() == QUEEN) {
+                    Square *thisPiece = getSquare(i, j);
+                    for (int k=0; k<8; k++) {
+                        Square *thatSpace = getSquare(i, k);
+                        if (square[i][j].getColor() != square[i][k].getColor()) {
+                            swap_pieces(thisPiece, thatSpace);
+                            if (is_in_check(kingX, kingY) == KING) ok=1;
+                            swap_pieces(thisPiece, thatSpace);
+                        }
+                        else break;
+                    }
+                    for (int k=0; k<8; k++) {
+                        Square *thatSpace = getSquare(k, j);
+                        if (square[i][j].getColor() != square[k][j].getColor()) {
+                            swap_pieces(thisPiece, thatSpace);
+                            if (is_in_check(kingX, kingY) == KING) ok=1;
+                            swap_pieces(thisPiece, thatSpace);
+                        }
+                        else break;
+                    }
+                    for (int k=i, l=j; k<8,l<8; k++,l++) {
+                        Square *thatSpace = getSquare(k, l);
+                        if (square[i][j].getColor() != square[k][l].getColor()) {
+                            swap_pieces(thisPiece, thatSpace);
+                            if (is_in_check(kingX, kingY) == KING) ok=1;
+                            swap_pieces(thisPiece, thatSpace);
+                        }
+                        else break;
+                    }
+                    for (int k=i, l=j; k>=0,l<8; k--,l++) {
+                        Square *thatSpace = getSquare(k, l);
+                        if (square[i][j].getColor() != square[k][l].getColor()) {
+                            swap_pieces(thisPiece, thatSpace);
+                            if (is_in_check(kingX, kingY) == KING) ok=1;
+                            swap_pieces(thisPiece, thatSpace);
+                        }
+                        else break;
+                    }
+                    for (int k=i, l=j; k<8,l>=0; k++,l--) {
+                        Square *thatSpace = getSquare(k, l);
+                        if (square[i][j].getColor() != square[k][l].getColor()) {
+                            swap_pieces(thisPiece, thatSpace);
+                            if (is_in_check(kingX, kingY) == KING) ok=1;
+                            swap_pieces(thisPiece, thatSpace);
+                        }
+                        else break;
+                    }
+                    for (int k=i, l=j; k>=0,l>=0; k--,l--) {
+                        Square *thatSpace = getSquare(k, l);
+                        if (square[i][j].getColor() != square[k][l].getColor()) {
+                            swap_pieces(thisPiece, thatSpace);
+                            if (is_in_check(kingX, kingY) == KING) ok=1;
+                            swap_pieces(thisPiece, thatSpace);
+                        }
+                        else break;
+                    }
+                }
+            }
+        }
+
+    if (ok) return true;
+    return false;
+}
+
+bool Board::RookPossibleMoves(int kingX, int kingY)
+{
+    int ok=0;
+
+        for (int i=0; i<8; i++) {
+            for (int j=0; j<8; j++) {
+                if (square[i][j].getColor() == square[kingX][kingY].getColor() && square[i][j].getPiece() == ROOK) {
+                    Square *thisPiece = getSquare(i, j);
+                    for (int k=0; k<8; k++) {
+                        Square *thatSpace = getSquare(i, k);
+                        if (square[i][j].getColor() != square[i][k].getColor()) {
+                            swap_pieces(thisPiece, thatSpace);
+                            if (is_in_check(kingX, kingY) == KING) ok=1;
+                            swap_pieces(thisPiece, thatSpace);
+                        }
+                        else break;
+                    }
+                    for (int k=0; k<8; k++) {
+                        Square *thatSpace = getSquare(k, j);
+                        if (square[i][j].getColor() != square[k][j].getColor()) {
+                            swap_pieces(thisPiece, thatSpace);
+                            if (is_in_check(kingX, kingY) == KING) ok=1;
+                            swap_pieces(thisPiece, thatSpace);
+                        }
+                        else break;
+                    }
+                }
+            }
+        }
+
+    if (ok) return true;
+    return false;
+}
+
+bool Board::BishopPossibleMoves(int kingX, int kingY)
+{
+    int ok=0;
+
+        for (int i=0; i<8; i++) {
+            for (int j=0; j<8; j++) {
+                if (square[i][j].getColor() == square[kingX][kingY].getColor() && square[i][j].getPiece() == BISHOP) {
+                    Square *thisPiece = getSquare(i, j);
+                    for (int k=i, l=j; k<8,l<8; k++,l++) {
+                        Square *thatSpace = getSquare(k, l);
+                        if (square[i][j].getColor() != square[k][l].getColor()) {
+                            swap_pieces(thisPiece, thatSpace);
+                            if (is_in_check(kingX, kingY) == KING) ok=1;
+                            swap_pieces(thisPiece, thatSpace);
+                        }
+                        else break;
+                    }
+                    for (int k=i, l=j; k>=0,l<8; k--,l++) {
+                        Square *thatSpace = getSquare(k, l);
+                        if (square[i][j].getColor() != square[k][l].getColor()) {
+                            swap_pieces(thisPiece, thatSpace);
+                            if (is_in_check(kingX, kingY) == KING) ok=1;
+                            swap_pieces(thisPiece, thatSpace);
+                        }
+                        else break;
+                    }
+                    for (int k=i, l=j; k<8,l>=0; k++,l--) {
+                        Square *thatSpace = getSquare(k, l);
+                        if (square[i][j].getColor() != square[k][l].getColor()) {
+                            swap_pieces(thisPiece, thatSpace);
+                            if (is_in_check(kingX, kingY) == KING) ok=1;
+                            swap_pieces(thisPiece, thatSpace);
+                        }
+                        else break;
+                    }
+                    for (int k=i, l=j; k>=0,l>=0; k--,l--) {
+                        Square *thatSpace = getSquare(k, l);
+                        if (square[i][j].getColor() != square[k][l].getColor()) {
+                            swap_pieces(thisPiece, thatSpace);
+                            if (is_in_check(kingX, kingY) == KING) ok=1;
+                            swap_pieces(thisPiece, thatSpace);
+                        }
+                        else break;
+                    }
+                }
+            }
+        }
+
+    if (ok) return true;
+    return false;
+}
+
+bool Board::KnightPossibleMoves(int kingX, int kingY)
+{
+    int ok=0;
+
+        for (int i=0; i<8; i++) {
+            for (int j=0; j<8; j++) {
+                if (square[i][j].getColor() == square[kingX][kingY].getColor() && square[i][j].getPiece() == KNIGHT) {
+                    Square *thisPiece = getSquare(i, j);
+
+                    Square *thatSpace = getSquare(i+2, j+1);
+                    if (square[i][j].getColor() != square[i+2][j+1].getColor()) {
+                        swap_pieces(thisPiece, thatSpace);
+                        if (is_in_check(kingX, kingY) == KING) ok=1;
+                        swap_pieces(thisPiece, thatSpace);
+                    }
+
+                    thatSpace = getSquare(i-2, j+1);
+                    if (square[i][j].getColor() != square[i-2][j+1].getColor()) {
+                        swap_pieces(thisPiece, thatSpace);
+                        if (is_in_check(kingX, kingY) == KING) ok=1;
+                        swap_pieces(thisPiece, thatSpace);
+                    }
+
+                    thatSpace = getSquare(i-2, j-1);
+                    if (square[i][j].getColor() != square[i-2][j-1].getColor()) {
+                        swap_pieces(thisPiece, thatSpace);
+                        if (is_in_check(kingX, kingY) == KING) ok=1;
+                        swap_pieces(thisPiece, thatSpace);
+                    }
+
+                    thatSpace = getSquare(i-1, j-2);
+                    if (square[i][j].getColor() != square[i-1][j-2].getColor()) {
+                        swap_pieces(thisPiece, thatSpace);
+                        if (is_in_check(kingX, kingY) == KING) ok=1;
+                        swap_pieces(thisPiece, thatSpace);
+                    }
+
+                    thatSpace = getSquare(i-1, j+2);
+                    if (square[i][j].getColor() != square[i-1][j+2].getColor()) {
+                        swap_pieces(thisPiece, thatSpace);
+                        if (is_in_check(kingX, kingY) == KING) ok=1;
+                        swap_pieces(thisPiece, thatSpace);
+                    }
+
+                    thatSpace = getSquare(i+1, j+2);
+                    if (square[i][j].getColor() != square[i+1][j+2].getColor()) {
+                        swap_pieces(thisPiece, thatSpace);
+                        if (is_in_check(kingX, kingY) == KING) ok=1;
+                        swap_pieces(thisPiece, thatSpace);
+                    }
+
+                    thatSpace = getSquare(i+1, j-2);
+                    if (square[i][j].getColor() != square[i+1][j-2].getColor()) {
+                        swap_pieces(thisPiece, thatSpace);
+                        if (is_in_check(kingX, kingY) == KING) ok=1;
+                        swap_pieces(thisPiece, thatSpace);
+                    }
+
+                    thatSpace = getSquare(i+2, j-1);
+                    if (square[i][j].getColor() != square[i+2][j-1].getColor()) {
+                        swap_pieces(thisPiece, thatSpace);
+                        if (is_in_check(kingX, kingY) == KING) ok=1;
+                        swap_pieces(thisPiece, thatSpace);
+                    }
+                }
+            }
+        }
+
+    if (ok) return true;
+    return false;
+}
+
 bool Board::moveKing(Square* thisKing, Square* thatSpace) {
 	//off board inputs should be handled elsewhere (before this)
 	//squares with same color should be handled elsewhere (before this)
@@ -189,15 +631,27 @@ bool Board::moveKing(Square* thisKing, Square* thatSpace) {
 
 	if ((abs(kingX - thatX) == 1 && abs(kingY - thatY) == 0) || (abs(kingX - thatX) == 0 && abs(kingY - thatY) == 1) || (abs(kingX - thatX) == 1 && abs(kingY - thatY) == 1))
 	{
-		thatSpace->setSpace(thisKing);
-		thisKing->setEmpty();
-		return true;
+	    if (is_in_check(kingX, kingY) == false) {
+            thatSpace->setSpace(thisKing);
+            thisKing->setEmpty();
+            if (turn == WHITE) {
+                this->WhiteKingX = thatX;
+                this->WhiteKingY = thatY;
+            }
+            else {
+                this->BlackKingX = thatX;
+                this->BlackKingY = thatY;
+            }
+            return true;
+	    }
 	}
 	else
 	{
 		return false;
 	}
 }
+
+bool Board::check = false;
 
 bool Board::moveQueen(Square* thisQueen, Square* thatSpace) { //there might be problems with numbers of brackets
 													   //off board inputs should be handled elsewhere (before this)
@@ -239,15 +693,34 @@ bool Board::moveQueen(Square* thisQueen, Square* thatSpace) { //there might be p
 
 					}
 				}
-				else
-					return false;
+				else return false;
 	}
 
 	if (invalid == false)
 	{
-		thatSpace->setSpace(thisQueen);
-		thisQueen->setEmpty();
-		return true;
+        if (this->check == true) {
+            thatSpace->setSpace(thisQueen);
+		    thisQueen->setEmpty();
+
+		    if (this->turn == WHITE)
+                if (is_in_check(this->WhiteKingX, this->WhiteKingY) != KING) {
+                    thisQueen->setSpace(thatSpace);
+                    thatSpace->setEmpty();
+                    return false;
+                }
+            else
+                if (is_in_check(this->BlackKingX, this->BlackKingY) != KING) {
+                thisQueen->setSpace(thatSpace);
+                thatSpace->setEmpty();
+                return false;
+            }
+            check = false;
+        }
+        else {
+            thatSpace->setSpace(thisQueen);
+            thisQueen->setEmpty();
+            return true;
+        }
 	}
 	else
 	{
@@ -273,9 +746,28 @@ bool Board::moveBishop(Square* thisBishop, Square* thatSpace) { //there might be
 
 	if (invalid == false)
 	{
-		thatSpace->setSpace(thisBishop);
-		thisBishop->setEmpty();
-		return true;
+		if (this->check == true) {
+            thatSpace->setSpace(thisBishop);
+		    thisBishop->setEmpty();
+		    if (this->turn == WHITE)
+                if (is_in_check(this->WhiteKingX, this->WhiteKingY) != KING) {
+                    thisBishop->setSpace(thatSpace);
+                    thatSpace->setEmpty();
+                    return false;
+                }
+            else
+                if (is_in_check(this->BlackKingX, this->BlackKingY) != KING) {
+                thisBishop->setSpace(thatSpace);
+                thatSpace->setEmpty();
+                return false;
+            }
+            check = false;
+        }
+        else {
+            thatSpace->setSpace(thisBishop);
+            thisBishop->setEmpty();
+            return true;
+        }
 	}
 	else
 	{
@@ -294,9 +786,28 @@ bool Board::moveKnight(Square* thisKnight, Square* thatSpace)
 
 	if ((abs(knightX - thatX) == 2 && abs(knightY - thatY) == 1) || (abs(knightX - thatX) == 1 && abs(knightY - thatY) == 2))
 	{
-		thatSpace->setSpace(thisKnight);
-		thisKnight->setEmpty();
-		return true;
+		if (this->check == true) {
+            thatSpace->setSpace(thisKnight);
+		    thisKnight->setEmpty();
+		    if (this->turn == WHITE)
+                if (is_in_check(this->WhiteKingX, this->WhiteKingY) != KING) {
+                    thisKnight->setSpace(thatSpace);
+                    thatSpace->setEmpty();
+                    return false;
+                }
+            else
+                if (is_in_check(this->BlackKingX, this->BlackKingY) != KING) {
+                thisKnight->setSpace(thatSpace);
+                thatSpace->setEmpty();
+                return false;
+            }
+            check = false;
+        }
+        else {
+            thatSpace->setSpace(thisKnight);
+            thisKnight->setEmpty();
+            return true;
+        }
 	}
 	else
 	{
@@ -332,9 +843,28 @@ bool Board::moveRook(Square* thisRook, Square* thatSpace)
 
 	if (invalid == false)
 	{
-		thatSpace->setSpace(thisRook);
-		thisRook->setEmpty();
-		return true;
+		if (this->check == true) {
+            thatSpace->setSpace(thisRook);
+		    thisRook->setEmpty();
+		    if (this->turn == WHITE)
+                if (is_in_check(this->WhiteKingX, this->WhiteKingY) != KING) {
+                    thisRook->setSpace(thatSpace);
+                    thatSpace->setEmpty();
+                    return false;
+                }
+            else
+                if (is_in_check(this->BlackKingX, this->BlackKingY) != KING) {
+                thisRook->setSpace(thatSpace);
+                thatSpace->setEmpty();
+                return false;
+            }
+            check = false;
+        }
+        else {
+            thatSpace->setSpace(thisRook);
+            thisRook->setEmpty();
+            return true;
+        }
 	}
 	else
 	{
@@ -346,8 +876,7 @@ bool Board::moveRook(Square* thisRook, Square* thatSpace)
 bool Board::movePawn(Square* thisPawn, Square* thatSpace) {
 	//off board inputs should be handled elsewhere (before this)
 	//squares with same color should be handled elsewhere (before this)
-	using namespace std;
-	bool invalid = false;
+	bool valid = false;
 	int pawnX = thisPawn->getX();
 	int pawnY = thisPawn->getY();
 	int thatX = thatSpace->getX();
@@ -357,16 +886,12 @@ bool Board::movePawn(Square* thisPawn, Square* thatSpace) {
 	{
 		if (pawnX == thatX - 1 && thatY == pawnY && thatSpace->getColor() == NONE)
 		{
-			thatSpace->setSpace(thisPawn);
-			thisPawn->setEmpty();
-			return true;
+			valid = true;
 		}
 		else
 			if ((pawnY + 1 == thatY || pawnY - 1 == thatY) && pawnX + 1 == thatX  && thatSpace->getColor() == BLACK)
 			{
-				thatSpace->setSpace(thisPawn);
-				thisPawn->setEmpty();
-				return true;
+				valid = true;
 			}
 			else
 				return false;
@@ -376,22 +901,42 @@ bool Board::movePawn(Square* thisPawn, Square* thatSpace) {
 		{
 			if (pawnX == thatX + 1 && thatY == pawnY && thatSpace->getColor() == NONE)
 			{
-				thatSpace->setSpace(thisPawn);
-				thisPawn->setEmpty();
-				return true;
+				valid = true;
 			}
 			else
 				if ((pawnY + 1 == thatY || pawnY - 1 == thatY) && pawnX - 1 == thatX  && thatSpace->getColor() == WHITE)
 				{
-					thatSpace->setSpace(thisPawn);
-					thisPawn->setEmpty();
-					return true;
+					valid = true;
 				}
 				else
 					return false;
 		}
 		else
 			return false;
+    if (valid) {
+        if (this->check == true) {
+            thatSpace->setSpace(thisPawn);
+		    thisPawn->setEmpty();
+		    if (this->turn == WHITE)
+                if (is_in_check(this->WhiteKingX, this->WhiteKingY) != KING) {
+                    thisPawn->setSpace(thatSpace);
+                    thatSpace->setEmpty();
+                    return false;
+                }
+            else
+                if (is_in_check(this->BlackKingX, this->BlackKingY) != KING) {
+                thisPawn->setSpace(thatSpace);
+                thatSpace->setEmpty();
+                return false;
+            }
+            check = false;
+        }
+        else {
+            thatSpace->setSpace(thisPawn);
+            thisPawn->setEmpty();
+            return true;
+        }
+    }
 }
 
 bool Board::makeMove(int x1, int y1, int x2, int y2) {
