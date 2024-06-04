@@ -39,6 +39,42 @@ void Square::setPieceAndColor(Piece p, Color c)
 	color = c;
 }
 
+
+enPassant::enPassant(){
+    coord_x = -1;
+    coord_y = -1;
+    permitted = false;
+}
+
+void enPassant::setX(int x) {
+    coord_x = x;
+}
+
+
+void enPassant::setY(int y) {
+    coord_y = y;
+}
+
+void enPassant::setPermitted(bool perm) {
+    permitted = perm;
+}
+
+int enPassant::getX() {
+    return coord_x;
+}
+
+
+int enPassant::getY() {
+    return coord_y;
+}
+
+bool enPassant::getPermitted() {
+    return permitted;
+}
+
+
+
+
 void Board::printBoard() {
     using namespace std;
 
@@ -197,18 +233,17 @@ void Board::setBoard_EnPassant() {
             square[i][j].setY(j);
         }
 
-    square[1][3].setPieceAndColor(PAWN,WHITE);
     square[1][4].setPieceAndColor(PAWN,WHITE);
-    square[1][5].setPieceAndColor(PAWN,WHITE);
-    square[1][6].setPieceAndColor(PAWN,WHITE);
+    square[1][7].setPieceAndColor(PAWN,WHITE);
+    square[4][2].setPieceAndColor(PAWN,WHITE);
+    square[4][3].setPieceAndColor(PAWN,WHITE);
 
 
-    square[3][2].setPieceAndColor(PAWN,BLACK);
-    square[3][3].setPieceAndColor(PAWN,BLACK);
+    square[3][6].setPieceAndColor(PAWN,BLACK);
     square[3][4].setPieceAndColor(PAWN,BLACK);
     square[3][5].setPieceAndColor(PAWN,BLACK);
-    square[6][0].setPieceAndColor(PAWN,BLACK);
     square[6][1].setPieceAndColor(PAWN,BLACK);
+    square[6][4].setPieceAndColor(PAWN,BLACK);
 
 }
 
@@ -494,9 +529,19 @@ bool Board::movePawn(Square* thisPawn, Square* thatSpace) {
 	int pawnY = thisPawn->getY();
 	int thatX = thatSpace->getX();
 	int thatY = thatSpace->getY();
+//If EnPassant == True
+    //If Move is for enpassant, take piece or smth.
+        //En passant == False
+//Save Move Here in "EnPassant->LastPawnMove"
+
+    if(abs(pawnX - thatX)==2){
 
 
-    //First move (2 steps)
+    }
+//Check difference between endPos and startPos
+    //If difference == 2
+        //If endPos.y +1 or endPos.y -1 are opposing collor pawns
+            // Position endPos is EnPassantable
 
 
 
@@ -505,13 +550,35 @@ bool Board::movePawn(Square* thisPawn, Square* thatSpace) {
 
 	if (thisPawn->getColor() == WHITE)
 	{
+        //Verify EnPassant Move
+        if(EnPassant.getPermitted()){
+            if(thatX == EnPassant.getX()+1 && thatY == EnPassant.getY()){
+                if(abs(EnPassant.getY() - pawnY) == 1 && pawnX == EnPassant.getX()){
+                    thatSpace->setSpace(thisPawn);
+                    thisPawn->setEmpty();
+                    getSquare(EnPassant.getX(),EnPassant.getY())->setEmpty();
+                    return true;
+
+                }
+            }
+        }
+        EnPassant.setPermitted(false);
+
+        //First move (2 steps)
         if(pawnX == 1 && thatX == 3 && getSquare(2,pawnY)->getColor() == NONE && thatSpace->getColor() == NONE){
             thatSpace->setSpace(thisPawn);
             thisPawn->setEmpty();
+            if(getSquare(thatX,thatY+1)->getColor()==BLACK || getSquare(thatX,thatY-1)->getColor()==BLACK){
+                if(getSquare(thatX,thatY+1)->getPiece() == PAWN || getSquare(thatX,thatY-1)->getPiece() == PAWN){
+                    EnPassant.setPermitted(true);
+                    EnPassant.setX(thatX);
+                    EnPassant.setY(thatY);
+                }
+            }
             return true;
         }
 
-
+        //Step
 		if (pawnX == thatX - 1 && thatY == pawnY && thatSpace->getColor() == NONE)
 		{
 			thatSpace->setSpace(thisPawn);
@@ -519,6 +586,7 @@ bool Board::movePawn(Square* thisPawn, Square* thatSpace) {
 			return true;
 		}
 		else
+            //Capture
 			if ((pawnY + 1 == thatY || pawnY - 1 == thatY) && pawnX + 1 == thatX  && thatSpace->getColor() == BLACK)
 			{
 				thatSpace->setSpace(thisPawn);
@@ -531,9 +599,31 @@ bool Board::movePawn(Square* thisPawn, Square* thatSpace) {
 	else
 		if (thisPawn->getColor() == BLACK)
 		{
+            //verify EnPassant Move
+
+            if(EnPassant.getPermitted()){
+                if(thatX == EnPassant.getX()-1 && thatY == EnPassant.getY()){
+                    if(abs(EnPassant.getY() - pawnY) == 1 && pawnX == EnPassant.getX()){
+                        thatSpace->setSpace(thisPawn);
+                        thisPawn->setEmpty();
+                        getSquare(EnPassant.getX(),EnPassant.getY())->setEmpty();
+                        return true;
+
+                    }
+                }
+            }
+            EnPassant.setPermitted(false);
+
             if(pawnX == 6 && thatX == 4 && getSquare(5,pawnY)->getColor() == NONE && thatSpace->getColor() == NONE){
                 thatSpace->setSpace(thisPawn);
                 thisPawn->setEmpty();
+                if(getSquare(thatX,thatY+1)->getColor()==WHITE || getSquare(thatX,thatY-1)->getColor()==WHITE){
+                    if(getSquare(thatX,thatY+1)->getPiece() == PAWN || getSquare(thatX,thatY-1)->getPiece() == PAWN){
+                        EnPassant.setPermitted(true);
+                        EnPassant.setX(thatX);
+                        EnPassant.setY(thatY);
+                    }
+                }
                 return true;
             }
 			if (pawnX == thatX + 1 && thatY == pawnY && thatSpace->getColor() == NONE)
@@ -572,6 +662,10 @@ bool Board::makeMove(int x1, int y1, int x2, int y2) {
 		std::cout << "Invalid move: cannot land on your own piece" << std::endl;
 		return false;
 	}
+
+    //Save the move Somewhere
+    //LastMove
+
 
 	switch (src->getPiece())
 	{

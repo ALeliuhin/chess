@@ -9,7 +9,6 @@ enum Color { WHITE, BLACK, NONE };
 
 class Square
 {
-	bool enPassant;
 	Piece piece;
 	Color color;
 	int x, y;
@@ -26,8 +25,26 @@ public:
 	Square();
 };
 
+class enPassant
+{
+    int coord_x;
+    int coord_y;
+    bool permitted;
+
+public:
+    enPassant();
+    void setX(int x);
+    void setY(int y);
+    void setPermitted(bool perm);
+    int getX();
+    int getY();
+    bool getPermitted();
+
+};
+
 class Board
 {
+    enPassant EnPassant;
 	Square square[8][8];
 	Color turn=WHITE;
 	bool moveKing(Square* thisKing, Square* thatSpace);
@@ -40,6 +57,7 @@ class Board
 	void printBoard();
 
 
+
 public:
 	Square* getSquare(int x, int y) {
 		return &square[x][y];
@@ -47,9 +65,10 @@ public:
 	void setSquare(Square * s, int x, int y){
 		square[x][y]=*s;
 	}
+
 	bool doMove();
     Color getTurn();
-	
+
 	void setBoard();
     void setBoard_EnPassant();
     void setBoard_Castling();
