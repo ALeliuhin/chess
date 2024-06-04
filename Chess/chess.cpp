@@ -749,7 +749,7 @@ bool Board::moveKing(Square* thisKing, Square* thatSpace) {
     //Create flag for castling? Rn it can do it multiple times if conditions are met
     //for white
 
-    if ((getTurn() == WHITE && (kingX == 0 && kingY == 4))) {
+        if ((turn == WHITE && (kingX == 0 && kingY == 4))) {
         //Right side ROOK
         if ((thatX == 0 && thatY == 6) && getSquare(0, 7)->getPiece() == ROOK) {
             if (getSquare(0, 5)->getColor() == NONE && getSquare(0, 6)->getColor() == NONE) {
@@ -776,8 +776,8 @@ bool Board::moveKing(Square* thisKing, Square* thatSpace) {
 
         }
     }
-            //for Black side
-    else if ((getTurn() == BLACK && (kingX == 7 && kingY == 4))) {
+        //for Black side
+    else if ((turn == BLACK && (kingX == 7 && kingY == 4))) {
         //Right side ROOK
         if ((thatX == 7 && thatY == 6) && getSquare(7, 7)->getPiece() == ROOK) {
             if (getSquare(7, 5)->getColor() == NONE && getSquare(7, 6)->getColor() == NONE) {
@@ -805,29 +805,28 @@ bool Board::moveKing(Square* thisKing, Square* thatSpace) {
         }
 
 
-	if ((abs(kingX - thatX) == 1 && abs(kingY - thatY) == 0) || (abs(kingX - thatX) == 0 && abs(kingY - thatY) == 1) || (abs(kingX - thatX) == 1 && abs(kingY - thatY) == 1))
-	{
-	    if (is_in_check(kingX, kingY) == false) {
-            thatSpace->setSpace(thisKing);
-            thisKing->setEmpty();
-            if (turn == WHITE) {
-                this->WhiteKingX = thatX;
-                this->WhiteKingY = thatY;
+        if ((abs(kingX - thatX) == 1 && abs(kingY - thatY) == 0) ||
+            (abs(kingX - thatX) == 0 && abs(kingY - thatY) == 1) ||
+            (abs(kingX - thatX) == 1 && abs(kingY - thatY) == 1)) {
+            if (is_in_check(kingX, kingY) == false) {
+                thatSpace->setSpace(thisKing);
+                thisKing->setEmpty();
+                if (turn == WHITE) {
+                    this->WhiteKingX = thatX;
+                    this->WhiteKingY = thatY;
+                } else {
+                    this->BlackKingX = thatX;
+                    this->BlackKingY = thatY;
+                }
+                return true;
             }
-            else {
-                this->BlackKingX = thatX;
-                this->BlackKingY = thatY;
-            }
-            return true;
-	    }
-	}
-	else
-	{
-		return false;
-	}
+        } else {
+            return false;
+        }
+    }
 }
-
 bool Board::check = false;
+
 bool Board::moveQueen(Square* thisQueen, Square* thatSpace) { //there might be problems with numbers of brackets
 													   //off board inputs should be handled elsewhere (before this)
 													   //squares with same color should be handled elsewhere (before this)
@@ -1108,7 +1107,7 @@ bool Board::moveRook(Square* thisRook, Square* thatSpace)
 bool Board::movePawn(Square* thisPawn, Square* thatSpace) {
 	//off board inputs should be handled elsewhere (before this)
 	//squares with same color should be handled elsewhere (before this)
-
+    bool valid = false;
 	int pawnX = thisPawn->getX();
 	int pawnY = thisPawn->getY();
 	int thatX = thatSpace->getX();
@@ -1118,17 +1117,10 @@ bool Board::movePawn(Square* thisPawn, Square* thatSpace) {
         //En passant == False
 //Save Move Here in "EnPassant->LastPawnMove"
 
-    if(abs(pawnX - thatX)==2){
-
-
-    }
 //Check difference between endPos and startPos
     //If difference == 2
         //If endPos.y +1 or endPos.y -1 are opposing collor pawns
             // Position endPos is EnPassantable
-
-
-
 
 
 
@@ -1220,6 +1212,7 @@ bool Board::movePawn(Square* thisPawn, Square* thatSpace) {
 		}
 		else
 			return false;
+
     if (valid) {
         if (this->check == true) {
             thatSpace->setSpace(thisPawn);
