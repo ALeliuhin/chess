@@ -42,6 +42,15 @@ void Square::setPieceAndColor(Piece p, Color c)
 	this->color = c;
 }
 
+void Square::operator>(int x)
+{
+    this->x = x;
+}
+
+void Square::operator<(int y)
+{
+    this->y = y;
+}
 
 enPassant::enPassant(){
     coord_x = -1;
@@ -218,8 +227,8 @@ void Board::setBoard()
 	for (int i = 0; i < 8; i++)
 		for (int j = 0; j < 8; j++)
 		{
-			square[i][j].setX(i);
-			square[i][j].setY(j);
+			square[i][j]>i;
+			square[i][j]<j;
 		}
 }
 
