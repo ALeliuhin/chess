@@ -84,9 +84,6 @@ bool enPassant::getPermitted() {
     return permitted;
 }
 
-
-
-
 void Board::printBoard() {
     cout << GREEN << "      0  1  2  3  4  5  6  7 " << RESET << endl;
     cout << GREEN << " " << RESET << endl;
@@ -235,10 +232,6 @@ void Board::setBoard()
 
 void Board::setBoard_EnPassant() {
 
-
-
-
-
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
@@ -248,8 +241,8 @@ void Board::setBoard_EnPassant() {
     for (int i = 0; i < 8; i++)
         for (int j = 0; j < 8; j++)
         {
-            square[i][j].setX(i);
-            square[i][j].setY(j);
+            square[i][j]>i;
+            square[i][j]<j;
         }
 
     square[1][4].setPieceAndColor(PAWN,WHITE);
@@ -302,8 +295,8 @@ void Board::setBoard_Castling() {
     for (int i = 0; i < 8; i++)
         for (int j = 0; j < 8; j++)
         {
-            square[i][j].setX(i);
-            square[i][j].setY(j);
+            square[i][j]>i;
+            square[i][j]<j;
         }
 }
 
