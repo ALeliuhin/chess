@@ -126,7 +126,6 @@ void Board::printBoard() {
     }
 }
 
-
 bool Board::doMove() {
 	string move;
 	int x1, x2, y1, y2;
@@ -149,7 +148,7 @@ bool Board::doMove() {
         else
             if (is_in_check(this->BlackKingX, this->BlackKingY) != KING) {
                 if (!is_checkmated(this->BlackKingX, this->BlackKingY)) {
-                    cout<<"!!!Your king is in check!!!"<<endl;
+                    cout<< YELLOW << "!!!Your king is in check!!!" << RESET <<endl;
                     this->check = true;
                 }
                 else if (is_checkmated(this->BlackKingX, this->BlackKingY)) {
@@ -1287,51 +1286,4 @@ bool Board::makeMove(int x1, int y1, int x2, int y2) {
 		break;
 	}
 	return false;
-}
-
-void Board::setBoard_Test()
-{
-    square[0][0].setPieceAndColor(ROOK, WHITE);
-    square[0][2].setPieceAndColor(BISHOP, WHITE);
-    square[0][3].setPieceAndColor(QUEEN, WHITE);
-    square[0][4].setPieceAndColor(KING, WHITE);
-    square[0][5].setPieceAndColor(BISHOP, WHITE);
-    square[0][6].setPieceAndColor(KNIGHT, WHITE);
-    square[0][7].setPieceAndColor(ROOK, WHITE);
-
-    square[7][0].setPieceAndColor(ROOK, BLACK);
-    square[7][1].setPieceAndColor(KNIGHT, BLACK);
-    square[7][2].setPieceAndColor(BISHOP, BLACK);
-    square[7][3].setPieceAndColor(QUEEN, BLACK);
-    square[7][4].setPieceAndColor(KING, BLACK);
-    square[7][5].setPieceAndColor(EMPTY, NONE);
-    square[7][6].setPieceAndColor(KNIGHT, BLACK);
-    square[7][7].setPieceAndColor(ROOK, BLACK);
-
-    this->BlackKingX = 7;
-    this->BlackKingY = 4;
-    this->WhiteKingX = 0;
-    this->WhiteKingY = 4;
-
-    for (int i = 0; i < 8; i++)
-    {
-        square[1][i].setPieceAndColor(PAWN, WHITE);
-        square[6][i].setPieceAndColor(PAWN, BLACK);
-
-    }
-
-    for (int i = 2; i < 6; i++)
-    {
-        for (int j = 0; j < 8; j++)
-            square[i][j].setPieceAndColor(EMPTY, NONE);
-    }
-
-     square[4][1].setPieceAndColor(KNIGHT, WHITE);
-
-    for (int i = 0; i < 8; i++)
-        for (int j = 0; j < 8; j++)
-        {
-            square[i][j]>i;
-            square[i][j]<j;
-        }
 }
