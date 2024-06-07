@@ -126,13 +126,14 @@ void Board::printBoard() {
     }
 }
 
+
 bool Board::doMove() {
 	string move;
 	int x1, x2, y1, y2;
 	bool stop = false;
 	while (!stop)
 	{
-        (turn == WHITE) ? cout << "\nWhite's turn" << endl : cout << "\nBlack's turn" << endl;
+        (turn == WHITE) ? cout << "\nTurn = White" << endl << endl : cout << "\nTurn = Black" << endl << endl;
         if (turn == WHITE) {
             if (is_in_check(this->WhiteKingX, this->WhiteKingY) != KING) {
                 if (!is_checkmated(this->WhiteKingX, this->WhiteKingY)) {
@@ -140,7 +141,7 @@ bool Board::doMove() {
                     this->check = true;
                 }
                 else {
-                    cout << "BLACK WINS" << endl;
+                    cout << BOLD_RED << "BLACK WINS" << RESET << endl;
 			        return false;
                 }
             }
@@ -152,11 +153,11 @@ bool Board::doMove() {
                     this->check = true;
                 }
                 else if (is_checkmated(this->BlackKingX, this->BlackKingY)) {
-                    cout << "WHITE WINS" << endl;
+                    cout << BOLD_RED << "WHITE WINS" << RESET << endl;
                     return false;
                 }
             }
-		cout << "Type in your move as a single four character string. Use x-coordinates first in each pair." << endl;
+		cout << "Type in the move as four consecutive integers, where the first two are the coordinates of the initial position, and the last two are the coordinates for the end position."<< endl << endl;
 		cin >> move;
 		x1 = move[0] - 48;
 		y1 = move[1] - 48;
@@ -166,12 +167,12 @@ bool Board::doMove() {
 		{
 			if (makeMove(x1, y1, x2, y2) == false)
 			{
-				cout << BOLD_RED << "Invalid move, try again." << RESET << endl;
+				cout << BOLD_RED << "Invalid move. Try again!" << RESET << endl;
 			}
             else stop = true;
 		}
 		else
-			cout << BOLD_RED << "That's not your piece. Try again." << RESET << endl;
+			cout << BOLD_RED << "Wrong piece. Try again!" << RESET << endl;
 	}
 
 	if (turn == BLACK)
@@ -1286,4 +1287,26 @@ bool Board::makeMove(int x1, int y1, int x2, int y2) {
 		break;
 	}
 	return false;
+}
+
+int main()
+{
+    system("cls");
+    unique_ptr<Board> b = make_unique<Board>();
+    string s;
+    bool newgame = true;
+    cout << GREEN << "   _____ _    _ ______  _____ _____ \n  / ____| |  | |  ____|/ ____/ ____| \n | |    | |__| | |__  | (___| (___  \n | |    |  __  |  __|  \\___  \\___ \\ \n | |____| |  | | |____ ____) |___) | \n  \\_____|_|  |_|______|_____/_____/ \n" << RESET << endl;
+	cout << GREEN << "Enter any key to continue" << RESET << endl;
+	cin >> s;
+
+    while(newgame){
+        b->setBoard();
+        while (b->playGame());
+        cout << GREEN << "Do you fancy playing again? (Y for Yes, anything else for No) " << RESET;
+        cin >> s;
+        if (s != "Y")
+            newgame = false;
+    }
+
+    return 0;
 }
