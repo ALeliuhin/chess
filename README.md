@@ -2,6 +2,7 @@
 
 ## Documentation
 
+
 1. The source code is spread across 3 source files: "main.cpp", "chess.cpp", "chess.h".
 2. The program comprises 3 classes: Square, enPassant, Board, declared in "chess.h".
     - Class Square consist of certain methods that allow manipulating the board space.
