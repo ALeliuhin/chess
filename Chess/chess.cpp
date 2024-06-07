@@ -134,9 +134,6 @@ bool Board::doMove() {
 	while (!stop)
 	{
         (turn == WHITE) ? cout << "\nWhite's turn" << endl : cout << "\nBlack's turn" << endl;
-        cout<<this->check<<endl;
-        cout<<"White King on "<<this->WhiteKingX<<" "<<this->WhiteKingY<<endl;
-        cout<<"Black King on "<<this->BlackKingX<<" "<<this->BlackKingY<<endl;
         if (turn == WHITE) {
             if (is_in_check(this->WhiteKingX, this->WhiteKingY) != KING) {
                 if (!is_checkmated(this->WhiteKingX, this->WhiteKingY)) {
@@ -161,7 +158,6 @@ bool Board::doMove() {
                 }
             }
 		cout << "Type in your move as a single four character string. Use x-coordinates first in each pair." << endl;
-		cout<<this->check<<endl;
 		cin >> move;
 		x1 = move[0] - 48;
 		y1 = move[1] - 48;
