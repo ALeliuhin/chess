@@ -85,8 +85,8 @@ bool enPassant::getPermitted() {
 }
 
 void Board::printBoard() {
-    cout << GREEN << "      0  1  2  3  4  5  6  7 " << RESET << endl;
-    cout << GREEN << " " << RESET << endl;
+    cout << GREEN << "  y   0  1  2  3  4  5  6  7 " << RESET << endl;
+    cout << GREEN << " x  " << RESET << endl;
     for (int i = 0; i < 8; i++) {
         cout << GREEN << " " << i << "   " << RESET;
         for (int j = 0; j < 8; j++) {
@@ -134,11 +134,14 @@ bool Board::doMove() {
 	while (!stop)
 	{
         (turn == WHITE) ? cout << "\nWhite's turn" << endl : cout << "\nBlack's turn" << endl;
+        cout<<this->check<<endl;
+        cout<<"White King on "<<this->WhiteKingX<<" "<<this->WhiteKingY<<endl;
+        cout<<"Black King on "<<this->BlackKingX<<" "<<this->BlackKingY<<endl;
         if (turn == WHITE) {
             if (is_in_check(this->WhiteKingX, this->WhiteKingY) != KING) {
                 if (!is_checkmated(this->WhiteKingX, this->WhiteKingY)) {
                     cout<< YELLOW << "!!!Your king is in check!!!" << RESET <<endl;
-                    static bool check = true;
+                    this->check = true;
                 }
                 else {
                     cout << "BLACK WINS" << endl;
@@ -150,7 +153,7 @@ bool Board::doMove() {
             if (is_in_check(this->BlackKingX, this->BlackKingY) != KING) {
                 if (!is_checkmated(this->BlackKingX, this->BlackKingY)) {
                     cout<<"!!!Your king is in check!!!"<<endl;
-                    static bool check = true;
+                    this->check = true;
                 }
                 else if (is_checkmated(this->BlackKingX, this->BlackKingY)) {
                     cout << "WHITE WINS" << endl;
@@ -158,6 +161,7 @@ bool Board::doMove() {
                 }
             }
 		cout << "Type in your move as a single four character string. Use x-coordinates first in each pair." << endl;
+		cout<<this->check<<endl;
 		cin >> move;
 		x1 = move[0] - 48;
 		y1 = move[1] - 48;
@@ -739,16 +743,12 @@ bool Board::KnightPossibleMoves(int kingX, int kingY)
 }
 
 bool Board::moveKing(Square* thisKing, Square* thatSpace) {
-    //off board inputs should be handled elsewhere (before this)
-    //squares with same color should be handled elsewhere (before this)
     int kingX = thisKing->getX();
     int kingY = thisKing->getY();
     int thatX = thatSpace->getX();
     int thatY = thatSpace->getY();
 
     //Castle verify
-    //Create flag for castling? Rn it can do it multiple times if conditions are met
-    //for white
 
         if ((turn == WHITE && (kingX == 0 && kingY == 4))) {
         //Right side ROOK
@@ -804,12 +804,15 @@ bool Board::moveKing(Square* thisKing, Square* thatSpace) {
             }
 
         }
+    }
 
 
         if ((abs(kingX - thatX) == 1 && abs(kingY - thatY) == 0) ||
             (abs(kingX - thatX) == 0 && abs(kingY - thatY) == 1) ||
             (abs(kingX - thatX) == 1 && abs(kingY - thatY) == 1)) {
-            if (is_in_check(kingX, kingY) == false) {
+            if (is_in_check(kingX, kingY) == KING) {
+                if (is_in_check(thatX, thatY) != KING) return false;
+                cout<<"Check0"<<endl;
                 thatSpace->setSpace(thisKing);
                 thisKing->setEmpty();
                 if (turn == WHITE) {
@@ -821,16 +824,29 @@ bool Board::moveKing(Square* thisKing, Square* thatSpace) {
                 }
                 return true;
             }
+            else {
+                if (is_in_check(thatX, thatY) != KING) return false;
+                cout<<"Check-1"<<endl;
+                thatSpace->setSpace(thisKing);
+                thisKing->setEmpty();
+                if (turn == WHITE) {
+                    this->WhiteKingX = thatX;
+                    this->WhiteKingY = thatY;
+                } else {
+                    this->BlackKingX = thatX;
+                    this->BlackKingY = thatY;
+                }
+                this->check = false;
+                return true;
+            }
         } else {
             return false;
         }
-    }
 }
+
 bool Board::check = false;
 
-bool Board::moveQueen(Square* thisQueen, Square* thatSpace) { //there might be problems with numbers of brackets
-													   //off board inputs should be handled elsewhere (before this)
-													   //squares with same color should be handled elsewhere (before this)
+bool Board::moveQueen(Square* thisQueen, Square* thatSpace) {
 
 	int queenX = thisQueen->getX();
 	int queenY = thisQueen->getY();
@@ -909,19 +925,22 @@ bool Board::moveQueen(Square* thisQueen, Square* thatSpace) { //there might be p
             thatSpace->setSpace(thisQueen);
 		    thisQueen->setEmpty();
 
-		    if (this->turn == WHITE)
+		    if (this->turn == WHITE) {
                 if (is_in_check(this->WhiteKingX, this->WhiteKingY) != KING) {
                     thisQueen->setSpace(thatSpace);
                     thatSpace->setEmpty();
                     return false;
                 }
-            else
+		    }
+            else {
                 if (is_in_check(this->BlackKingX, this->BlackKingY) != KING) {
                 thisQueen->setSpace(thatSpace);
                 thatSpace->setEmpty();
                 return false;
+                }
             }
             check = false;
+            return true;
         }
         else {
             thatSpace->setSpace(thisQueen);
@@ -935,7 +954,7 @@ bool Board::moveQueen(Square* thisQueen, Square* thatSpace) { //there might be p
 	}
 }
 
-bool Board::moveBishop(Square* thisBishop, Square* thatSpace) { //there might be problems with number of brackets
+bool Board::moveBishop(Square* thisBishop, Square* thatSpace) {
 	int bishopX = thisBishop->getX();
 	int bishopY = thisBishop->getY();
 	int thatX = thatSpace->getX();
@@ -963,19 +982,22 @@ bool Board::moveBishop(Square* thisBishop, Square* thatSpace) { //there might be
 		if (this->check == true) {
             thatSpace->setSpace(thisBishop);
 		    thisBishop->setEmpty();
-		    if (this->turn == WHITE)
+		    if (this->turn == WHITE) {
                 if (is_in_check(this->WhiteKingX, this->WhiteKingY) != KING) {
                     thisBishop->setSpace(thatSpace);
                     thatSpace->setEmpty();
                     return false;
                 }
-            else
+		    }
+            else {
                 if (is_in_check(this->BlackKingX, this->BlackKingY) != KING) {
                 thisBishop->setSpace(thatSpace);
                 thatSpace->setEmpty();
                 return false;
+                }
             }
             check = false;
+            return true;
         }
         else {
             thatSpace->setSpace(thisBishop);
@@ -991,8 +1013,6 @@ bool Board::moveBishop(Square* thisBishop, Square* thatSpace) { //there might be
 
 bool Board::moveKnight(Square* thisKnight, Square* thatSpace)
 {
-	//off board inputs should be handled elsewhere (before this)
-	//squares with same color should be handled elsewhere (before this)
 	int knightX = thisKnight->getX();
 	int knightY = thisKnight->getY();
 	int thatX = thatSpace->getX();
@@ -1003,17 +1023,19 @@ bool Board::moveKnight(Square* thisKnight, Square* thatSpace)
 		if (this->check == true) {
             thatSpace->setSpace(thisKnight);
 		    thisKnight->setEmpty();
-		    if (this->turn == WHITE)
+		    if (this->turn == WHITE) {
                 if (is_in_check(this->WhiteKingX, this->WhiteKingY) != KING) {
                     thisKnight->setSpace(thatSpace);
                     thatSpace->setEmpty();
                     return false;
                 }
-            else
+		    }
+            else {
                 if (is_in_check(this->BlackKingX, this->BlackKingY) != KING) {
-                thisKnight->setSpace(thatSpace);
-                thatSpace->setEmpty();
-                return false;
+                    thisKnight->setSpace(thatSpace);
+                    thatSpace->setEmpty();
+                    return false;
+                }
             }
             check = false;
         }
@@ -1031,8 +1053,6 @@ bool Board::moveKnight(Square* thisKnight, Square* thatSpace)
 
 bool Board::moveRook(Square* thisRook, Square* thatSpace)
 {
-	//off board inputs should be handled elsewhere (before this)
-	//squares with same color should be handled elsewhere (before this)
 	int rookX = thisRook->getX();
 	int rookY = thisRook->getY();
 	int thatX = thatSpace->getX();
@@ -1078,19 +1098,22 @@ bool Board::moveRook(Square* thisRook, Square* thatSpace)
 		if (this->check == true) {
             thatSpace->setSpace(thisRook);
 		    thisRook->setEmpty();
-		    if (this->turn == WHITE)
+		    if (this->turn == WHITE) {
                 if (is_in_check(this->WhiteKingX, this->WhiteKingY) != KING) {
                     thisRook->setSpace(thatSpace);
                     thatSpace->setEmpty();
                     return false;
                 }
-            else
+		    }
+            else {
                 if (is_in_check(this->BlackKingX, this->BlackKingY) != KING) {
                 thisRook->setSpace(thatSpace);
                 thatSpace->setEmpty();
                 return false;
+                }
             }
             check = false;
+            return true;
         }
         else {
             thatSpace->setSpace(thisRook);
@@ -1106,24 +1129,11 @@ bool Board::moveRook(Square* thisRook, Square* thatSpace)
 }
 
 bool Board::movePawn(Square* thisPawn, Square* thatSpace) {
-	//off board inputs should be handled elsewhere (before this)
-	//squares with same color should be handled elsewhere (before this)
     bool valid = false;
 	int pawnX = thisPawn->getX();
 	int pawnY = thisPawn->getY();
 	int thatX = thatSpace->getX();
 	int thatY = thatSpace->getY();
-//If EnPassant == True
-    //If Move is for enpassant, take piece or smth.
-        //En passant == False
-//Save Move Here in "EnPassant->LastPawnMove"
-
-//Check difference between endPos and startPos
-    //If difference == 2
-        //If endPos.y +1 or endPos.y -1 are opposing collor pawns
-            // Position endPos is EnPassantable
-
-
 
 	if (thisPawn->getColor() == WHITE)
 	{
@@ -1173,7 +1183,6 @@ bool Board::movePawn(Square* thisPawn, Square* thatSpace) {
 		if (thisPawn->getColor() == BLACK)
 		{
             //verify EnPassant Move
-
             if(EnPassant.getPermitted()){
                 if(thatX == EnPassant.getX()-1 && thatY == EnPassant.getY()){
                     if(abs(EnPassant.getY() - pawnY) == 1 && pawnX == EnPassant.getX()){
@@ -1218,21 +1227,27 @@ bool Board::movePawn(Square* thisPawn, Square* thatSpace) {
         if (this->check == true) {
             thatSpace->setSpace(thisPawn);
 		    thisPawn->setEmpty();
-		    if (this->turn == WHITE)
+		    if (this->turn == WHITE) {
                 if (is_in_check(this->WhiteKingX, this->WhiteKingY) != KING) {
                     thisPawn->setSpace(thatSpace);
                     thatSpace->setEmpty();
                     return false;
                 }
-            else
+		    }
+            else {
                 if (is_in_check(this->BlackKingX, this->BlackKingY) != KING) {
-                thisPawn->setSpace(thatSpace);
-                thatSpace->setEmpty();
-                return false;
+                    thisPawn->setSpace(thatSpace);
+                    thatSpace->setEmpty();
+                    cout<<"Check1"<<endl;
+                    return false;
+                }
             }
-            check = false;
+            cout<<"Check2"<<endl;
+            this->check = false;
+            return true;
         }
         else {
+            cout<<"Check3"<<endl;
             thatSpace->setSpace(thisPawn);
             thisPawn->setEmpty();
             return true;
@@ -1241,7 +1256,6 @@ bool Board::movePawn(Square* thisPawn, Square* thatSpace) {
 }
 
 bool Board::makeMove(int x1, int y1, int x2, int y2) {
-	//Checking for turns will be done previous to this
 	using namespace std;
 	if (x1 < 0 || x1>7 || y1 < 0 || y1>7 || x2 < 0 || x2>7 || y2 < 0 || y2>8)
 	{
@@ -1256,10 +1270,6 @@ bool Board::makeMove(int x1, int y1, int x2, int y2) {
 		std::cout << BOLD_RED << "Invalid move: cannot land on your own piece" << RESET << std::endl;
 		return false;
 	}
-
-    //Save the move Somewhere
-    //LastMove
-
 
 	switch (src->getPiece())
 	{
@@ -1281,4 +1291,51 @@ bool Board::makeMove(int x1, int y1, int x2, int y2) {
 		break;
 	}
 	return false;
+}
+
+void Board::setBoard_Test()
+{
+    square[0][0].setPieceAndColor(ROOK, WHITE);
+    square[0][2].setPieceAndColor(BISHOP, WHITE);
+    square[0][3].setPieceAndColor(QUEEN, WHITE);
+    square[0][4].setPieceAndColor(KING, WHITE);
+    square[0][5].setPieceAndColor(BISHOP, WHITE);
+    square[0][6].setPieceAndColor(KNIGHT, WHITE);
+    square[0][7].setPieceAndColor(ROOK, WHITE);
+
+    square[7][0].setPieceAndColor(ROOK, BLACK);
+    square[7][1].setPieceAndColor(KNIGHT, BLACK);
+    square[7][2].setPieceAndColor(BISHOP, BLACK);
+    square[7][3].setPieceAndColor(QUEEN, BLACK);
+    square[7][4].setPieceAndColor(KING, BLACK);
+    square[7][5].setPieceAndColor(EMPTY, NONE);
+    square[7][6].setPieceAndColor(KNIGHT, BLACK);
+    square[7][7].setPieceAndColor(ROOK, BLACK);
+
+    this->BlackKingX = 7;
+    this->BlackKingY = 4;
+    this->WhiteKingX = 0;
+    this->WhiteKingY = 4;
+
+    for (int i = 0; i < 8; i++)
+    {
+        square[1][i].setPieceAndColor(PAWN, WHITE);
+        square[6][i].setPieceAndColor(PAWN, BLACK);
+
+    }
+
+    for (int i = 2; i < 6; i++)
+    {
+        for (int j = 0; j < 8; j++)
+            square[i][j].setPieceAndColor(EMPTY, NONE);
+    }
+
+     square[4][1].setPieceAndColor(KNIGHT, WHITE);
+
+    for (int i = 0; i < 8; i++)
+        for (int j = 0; j < 8; j++)
+        {
+            square[i][j]>i;
+            square[i][j]<j;
+        }
 }
