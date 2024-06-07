@@ -10,6 +10,7 @@ enum Color { WHITE, BLACK, NONE };
 
 class Square
 {
+
 	int x, y;
 
 public:
@@ -18,8 +19,8 @@ public:
 	void setPieceAndColor(Piece, Color);
 	Piece getPiece();
 	Color getColor();
-	void setX(int ex) { x = ex; }
-	void setY(int why) { y = why; }
+	void operator<(int);
+	void operator>(int);
 	int getX() { return x; }
 	int getY() { return y; }
 	Square();
@@ -27,8 +28,26 @@ public:
 	Color color;
 };
 
+class enPassant
+{
+    int coord_x;
+    int coord_y;
+    bool permitted;
+
+public:
+    enPassant();
+    void setX(int x);
+    void setY(int y);
+    void setPermitted(bool perm);
+    int getX();
+    int getY();
+    bool getPermitted();
+
+};
+
 class Board
 {
+  	enPassant EnPassant;
 	Square square[8][8];
 	Color turn=WHITE;
 
@@ -55,7 +74,10 @@ public:
 	}
 
 	bool doMove();
+    Color getTurn();
 	void setBoard();
+	void setBoard_EnPassant();
+	void setBoard_Castling();
 	bool playGame();
 	Piece is_in_check(int, int);
 	static bool check;
