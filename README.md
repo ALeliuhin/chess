@@ -1,4 +1,15 @@
 # chess-C++
+<img src = "./source/public/meta/logo.png" width = "400px" height = "300px"/>
+
+# Project Description
+Our project is a command block application that let's you play chess, together with your friends.
+It is using the rules of any game of chess, and it even allows for special moves such as Castling or En Passant.
+
+# How to play
+
+In order to start the game, you need to provide any input to the command line. 
+Now that the board is ready, you have to provide a position owned by the current team's turn and a position on which the piece should end up. (Keep in mind the type of the piece!)
+Now try to check mate your opponent!
 
 ## Documentation
 
