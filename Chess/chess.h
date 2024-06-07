@@ -19,8 +19,8 @@ public:
 	void setPieceAndColor(Piece, Color);
 	Piece getPiece();
 	Color getColor();
-	void setX(int ex) { x = ex; }
-	void setY(int why) { y = why; }
+	void operator<(int);
+	void operator>(int);
 	int getX() { return x; }
 	int getY() { return y; }
 	Square();
