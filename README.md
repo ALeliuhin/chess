@@ -1,5 +1,5 @@
 # chess-C++
-<img src = "./source/public/meta/logo.png" width = "400px" height = "300px"/>
+<img src = "./Screenshot 2024-06-07 234132.png" width = "600px" height = "250px"/>
 
 # Project Description
 Our project is a command block application that let's you play chess, together with your friends.
